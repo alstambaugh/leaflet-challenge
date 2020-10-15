@@ -7,27 +7,46 @@ d3.json(queryUrl, function(data) {
     createFeatures(data.features);
 });
 
+//Function to define marker size
+function markerSize(feature) {
+  return feature.properties.mag * 5;
+}
+
+//Variable for marker options
+function style(feature) {
+  return {
+    radius: markerSize(feature),
+    fillColor: "#ff7800",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+  };
+}
+
+//function to perform on each feature
 function createFeatures(earthquakeData) {
 
-  // Define a function we want to run once for each feature in the features array
-  // Give each feature a popup describing the place and time of the earthquake
-  function onEachFeature(feature, layer) {
-    layer.bindPopup("<h3>" + feature.properties.place +
-      "</h3><hr><p>" + "Magnitude: " + feature.properties.mag + "</p><p>" + "Date: " + new Date(feature.properties.time) + "</p>");
-  }
-
   // Create a GeoJSON layer
-  var earthquakes = L.geoJSON(earthquakeData, {
-    onEachFeature: onEachFeature
-  });
+    var earthquakes = L.geoJSON(earthquakeData, {
+      pointToLayer: function(feature, latlng) {
+        return L.circleMarker(latlng, style(feature));
+          },
+      onEachFeature: function(feature, layer) {
+        //Pop-up
+        layer.bindPopup("<h3>" + feature.properties.place +
+        "</h3><hr><p>" + "Magnitude: " + feature.properties.mag + "</p><p>" + "Date: " + new Date(feature.properties.time) + "</p>");        
+      }
+    });
 
   // Send earthquakes layer to the createMap function
   createMap(earthquakes);
 }
 
+
 function createMap(earthquakes) {
 
-  // Define light and dark map layers
+  // Add tile layers
   var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
   attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
     tileSize: 512,
@@ -55,7 +74,7 @@ function createMap(earthquakes) {
     Earthquakes: earthquakes
   };
 
-  // Create our map, giving it the streetmap and earthquakes layers to display on load
+  // Create map
   var myMap = L.map("map", {
     center: [
       37.09, -95.71
