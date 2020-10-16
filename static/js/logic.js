@@ -1,11 +1,6 @@
-// API endpoint
+// API endpoints
 var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_day.geojson";
 var plateUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
-
-// Perform a GET request
-d3.json(queryUrl, function(data) {
-    createFeatures(data.features);
-});
 
 //Initialize plate layer
 var platesLayer = new L.LayerGroup()
@@ -17,11 +12,18 @@ d3.json(plateUrl, function(data) {
     });
 
 
+// Get earthquake data and run function
+d3.json(queryUrl, function(data) {
+    createFeatures(data.features);
+});
+
+
 //Function to define marker size
 function markerSize(feature) {
   return feature.properties.mag * 5;
 }
 
+//Function to change color of markers
 function chooseColor(feature) {
   var depth = feature;
     if (depth < 10) {
@@ -45,7 +47,6 @@ function chooseColor(feature) {
     
 }
 
-
 //Variable for marker options
 function style(feature) {
   return {
@@ -58,7 +59,7 @@ function style(feature) {
   };
 }
 
-//function to perform on each feature
+//Function to map earthquake data
 function createFeatures(earthquakeData) {
 
   // Create a GeoJSON layer
@@ -122,8 +123,8 @@ function createMap(earthquakes) {
 
   // Create overlay object
   var overlayMaps = {
-    Earthquakes: earthquakes,
-    Plates: platesLayer
+    "Earthquakes": earthquakes,
+    "Tectonic Plates": platesLayer
   };
 
   // Create a layer control
@@ -178,6 +179,4 @@ function createMap(earthquakes) {
     }]
   })
 .addTo(myMap);
-  
-
 }
