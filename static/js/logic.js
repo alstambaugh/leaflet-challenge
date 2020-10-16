@@ -1,11 +1,21 @@
 // API endpoint
-var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_day.geojson"
-
+var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_day.geojson";
+var plateUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
 
 // Perform a GET request
 d3.json(queryUrl, function(data) {
     createFeatures(data.features);
 });
+
+//Initialize plate layer
+var platesLayer = new L.LayerGroup()
+
+//Get plates layer
+d3.json(plateUrl, function(data) {
+    var plates = L.geoJson(data.features);
+      plates.addTo(platesLayer)
+    });
+
 
 //Function to define marker size
 function markerSize(feature) {
@@ -87,25 +97,34 @@ function createMap(earthquakes) {
     accessToken: API_KEY
   });
 
-  // Define a baseMaps object
-  var baseMaps = {
-    "Light Map": lightmap,
-    "Dark Map": darkmap
-  };
-
-  // Create overlay object
-  var overlayMaps = {
-    Earthquakes: earthquakes
-  };
-
+  var satellite = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+    maxZoom: 18,
+    id: "satellite-v9",
+    accessToken: API_KEY
+  });
+  
   // Create map
   var myMap = L.map("map", {
     center: [
       37.09, -95.71
     ],
     zoom: 3,
-    layers: [lightmap, earthquakes]
+    layers: [lightmap, earthquakes, platesLayer]
   });
+  
+  // Define a baseMaps object
+  var baseMaps = {
+    "Light Map": lightmap,
+    "Dark Map": darkmap,
+    "Satellite": satellite
+  };
+
+  // Create overlay object
+  var overlayMaps = {
+    Earthquakes: earthquakes,
+    Plates: platesLayer
+  };
 
   // Create a layer control
   L.control.layers(baseMaps, overlayMaps, {
@@ -159,4 +178,6 @@ function createMap(earthquakes) {
     }]
   })
 .addTo(myMap);
+  
+
 }
