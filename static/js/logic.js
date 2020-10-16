@@ -12,11 +12,35 @@ function markerSize(feature) {
   return feature.properties.mag * 5;
 }
 
+function chooseColor(feature) {
+  var depth = feature;
+    if (depth < 10) {
+      return "#00FF00"
+    }
+    else if (depth < 30) {
+      return "#ccff00"
+    }
+    else if (depth < 50) {
+      return "#FFCC00"
+    }
+    else if (depth < 70) {
+      return "#ff6600"
+    }
+    else if (depth < 90) {
+      return "#FF3300"
+    }
+    else {
+      return "#FF0000"
+    }
+    
+}
+
+
 //Variable for marker options
 function style(feature) {
   return {
     radius: markerSize(feature),
-    fillColor: "#ff7800",
+    fillColor: chooseColor(feature.geometry.coordinates[2]),
     color: "#000",
     weight: 1,
     opacity: 1,
@@ -35,8 +59,8 @@ function createFeatures(earthquakeData) {
       onEachFeature: function(feature, layer) {
         //Pop-up
         layer.bindPopup("<h3>" + feature.properties.place +
-        "</h3><hr><p>" + "Magnitude: " + feature.properties.mag + "</p><p>" + "Date: " + new Date(feature.properties.time) + "</p>");        
-      }
+        "</h3><hr><p>" + "Magnitude: " + feature.properties.mag + "<br>" + "Depth: " + feature.geometry.coordinates[2] + "</p><p>" + "Date: " + new Date(feature.properties.time) + "</p>");
+      }  
     });
 
   // Send earthquakes layer to the createMap function
@@ -79,7 +103,7 @@ function createMap(earthquakes) {
     center: [
       37.09, -95.71
     ],
-    zoom: 5,
+    zoom: 3,
     layers: [lightmap, earthquakes]
   });
 
@@ -87,4 +111,52 @@ function createMap(earthquakes) {
   L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
   }).addTo(myMap);
+
+  // Create legend
+  L.control.Legend({
+    position: 'bottomright',
+    collapsed: false,
+    symbolWidth: 24,
+    opacity: 1,
+    column: 1,
+    legends: [{
+      label: "<10",
+      type: "rectangle",
+      color: "#00FF00",
+      fillColor: "#00FF00",
+      weight: 1
+    }, {
+      label: "10-30",
+      type: "rectangle",
+      color: "#ccff00",
+      fillColor: "#ccff00",
+      weight: 1
+    }, {
+      label: "30-50",
+      type: "rectangle",
+      color: "#FFCC00",
+      fillColor: "#FFCC00",
+      weight: 1
+    }, {
+      label: "50-70",
+      type: "rectangle",
+      color: "#ff6600",
+      fillColor: "#ff6600",
+      weight: 1
+    }, {
+      label: "70-90",
+      type: "rectangle",
+      color: "#FF3300",
+      fillColor: "#FF3300",
+      weight: 1
+    }, {
+      label: "90+",
+      type: "rectangle",
+      color: "#FF0000",
+      fillColor: "#FF0000",
+      weight: 1
+     
+    }]
+  })
+.addTo(myMap);
 }
